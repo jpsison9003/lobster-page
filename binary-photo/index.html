@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Lobster Mosaic</title>
+
+<style>
+
+body{
+margin:0;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+overflow:hidden;
+}
+
+/* SMALL ORIGINAL IMAGE */
+#preview{
+position:fixed;
+top:15px;
+left:15px;
+width:120px;
+border:3px solid black;
+box-shadow:0 0 8px rgba(0,0,0,0.4);
+z-index:10;
+}
+
+/* MOSAIC */
+#output{
+font-family: monospace;
+font-size:6px;
+line-height:6px;
+letter-spacing:1px;
+white-space:pre;
+}
+
+.dark{color:black;}
+.light{color:#ff4d4d;}
+
+</style>
+</head>
+
+<body>
+
+<!-- SMALL ORIGINAL PHOTO -->
+<img id="preview" src="photo.png">
+
+<canvas id="canvas" style="display:none;"></canvas>
+<div id="output">Loading...</div>
+
+<script>
+
+const WORD = "LOBSTER";
+
+let img = new Image();
+img.src = "photo.png";
+
+img.onload = function(){
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const width = 300;
+const charRatio = 0.5;
+
+const rawHeight = img.height * (width / img.width) * charRatio;
+const height = Math.floor(rawHeight);
+
+canvas.width = width;
+canvas.height = height;
+
+ctx.drawImage(img,0,0,width,height);
+
+const data = ctx.getImageData(0,0,width,height).data;
+
+let output = "";
+let wordIndex = 0;
+
+for(let y=0;y<height;y++){
+for(let x=0;x<width;x++){
+
+let i = (y*width+x)*4;
+
+let r=data[i];
+let g=data[i+1];
+let b=data[i+2];
+
+let brightness=(r+g+b)/3;
+
+let char = WORD[wordIndex % WORD.length];
+wordIndex++;
+
+if(brightness<128){
+output += "<span class='dark'>"+char+"</span>";
+}else{
+output += "<span class='light'>"+char+"</span>";
+}
+}
+output += "\n";
+}
+
+document.getElementById("output").innerHTML=output;
+}
+
+img.onerror=function(){
+document.getElementById("output").innerHTML="IMAGE NOT FOUND";
+}
+
+</script>
+
+</body>
+</html>
